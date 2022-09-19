@@ -55,9 +55,7 @@ fun main() { //Projeto 1, 2, 3 e 4
         val cardToCompare = if (cardsOnTable.isEmpty()) "out" else cardsOnTable[cardsOnTable.lastIndex]
         val candidateCards5 = mutableListOf<String>()
         val candidateCards34shaped = pcHand.groupBy { it.last() }.filter { it.value.size > 1}.values
-        val candidates5shaped = candidateCards5.toList().groupBy { it.last() }.filter { it.value.size > 1}.values
-        val numfilter5 = candidates5shaped.toList().groupBy { it.first() }.filter { it.value.size > 1}.values
-        val numfilter34 = candidateCards34shaped.toList().groupBy { it.first() }.filter { it.value.size > 1}.values
+        val numfilter34 = if (candidateCards34shaped.isNotEmpty()) candidateCards34shaped.flatten().groupBy { it.first() }.filter { it.value.size > 1}.values else pcHand.groupBy { it.first() }.filter { it.value.size > 1}.values
         if (pcHand.size == 1) {
             return 0
         }
@@ -66,21 +64,33 @@ fun main() { //Projeto 1, 2, 3 e 4
                 candidateCards5.add(card)
             }
         }
-        println("candidates34: ${candidateCards34shaped.toList()}")
-        println("numfilter34: $numfilter34")
-        println("numfilter5: $numfilter5")
+        val candidates5shaped = candidateCards5.toList().groupBy { it.last() }.filter { it.value.size > 1}.values
+        val numfilter5 = if (candidates5shaped.isNotEmpty()) candidates5shaped.flatten().groupBy { it.first() }.filter { it.value.size > 1}.values else candidateCards5.groupBy { it.first() }.filter { it.value.size > 1}.values
 
         return when {
-            numfilter5.isEmpty() && numfilter34.isEmpty() -> {
+            numfilter5.isEmpty() -> {
                 return when {
-                    candidateCards5.isEmpty() && candidateCards34shaped.isEmpty() -> 0
-                    candidateCards5.isEmpty() -> pcHand.indexOf(candidateCards34shaped.toList()[0].toString())
-                    else -> pcHand.indexOf(candidateCards5.toList()[0].toString())
+                    candidates5shaped.isEmpty() -> {
+                        return when {
+                            candidateCards5.isEmpty() -> {
+                                return when {
+                                    numfilter34.isEmpty() && candidateCards34shaped.isEmpty() -> 0
+                                    numfilter34.isEmpty() && candidateCards34shaped.isNotEmpty() -> pcHand.indexOf(
+                                        candidateCards34shaped.flatten()[0])
+                                    numfilter34.isNotEmpty() -> pcHand.indexOf(numfilter34.flatten()[0])
+                                    else -> 0
+                                }
+                            }
+                            candidateCards5.isNotEmpty() -> pcHand.indexOf(candidateCards5[0])
+                            else -> 0
+                        }
+                    }
+                    candidates5shaped.isNotEmpty() -> pcHand.indexOf(candidates5shaped.flatten()[0])
+                    else -> 0
                 }
             }
-            numfilter5.isEmpty() && numfilter34.isNotEmpty() -> pcHand.indexOf(numfilter34.toList()[0].toString())
-
-            else -> pcHand.indexOf(numfilter5.toList()[0].toString())
+            numfilter5.isNotEmpty() -> pcHand.indexOf(numfilter5.flatten()[0])
+            else -> 0
         }
     }
 
@@ -243,39 +253,3 @@ fun main() { //Projeto 1, 2, 3 e 4
     }
     println("Game Over")
 }
-
-
-//if (candidateCards5.isNotEmpty()) {
-//    if (hearts5.size >= spades5.size && hearts5.size >= clubs5.size && hearts5.size >= diamonds5.size) {
-//        candidates5shaped.addAll(hearts5)
-//    } else if (spades5.size >= hearts5.size && spades5.size >= clubs5.size && spades5.size >= diamonds5.size) {
-//        candidates5shaped.addAll(spades5)
-//    } else if (clubs5.size >= hearts5.size && clubs5.size >= spades5.size && clubs5.size >= diamonds5.size) {
-//        candidates5shaped.addAll(clubs5)
-//    } else if (diamonds5.size >= hearts5.size && diamonds5.size >= spades5.size && diamonds5.size >= clubs5.size) {
-//        candidates5shaped.addAll(diamonds5)
-//    }
-//}
-//
-//val hearts5 = candidateCards5.filter { it.contains("♥") }
-//val spades5 = candidateCards5.filter { it.contains("♠") }
-//val clubs5 = candidateCards5.filter { it.contains("♣") }
-//val diamonds5 = candidateCards5.filter { it.contains("♦") }
-
-//val candidateCards34 = mutableListOf<String>()
-//val hearts = pcHand.filter { it.contains("♥") }
-//val spades = pcHand.filter { it.contains("♠") }
-//val clubs = pcHand.filter { it.contains("♣") }
-//val diamonds = pcHand.filter { it.contains("♦") }
-//
-//if (candidateCards5.isEmpty()) {
-//    if (hearts.size >= spades.size && hearts.size >= clubs.size && hearts.size >= diamonds.size) {
-//        candidateCards34.addAll(hearts)
-//    } else if (spades.size >= hearts.size && spades.size >= clubs.size && spades.size >= diamonds.size) {
-//        candidateCards34.addAll(spades)
-//    } else if (clubs.size >= hearts.size && clubs.size >= spades.size && clubs.size >= diamonds.size) {
-//        candidateCards34.addAll(clubs)
-//    } else if (diamonds.size >= hearts.size && diamonds.size >= spades.size && diamonds.size >= clubs.size) {
-//        candidateCards34.addAll(diamonds)
-//    }
-//}
